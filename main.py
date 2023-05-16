@@ -2,6 +2,7 @@ import requests
 from pathlib import Path
 from bs4 import BeautifulSoup
 from pathvalidate import sanitize_filename
+from urllib.parse import urljoin, urlsplit, unquote
 import os
 
 
@@ -23,45 +24,48 @@ def parse_book_info(url):
     response.raise_for_status()
     check_for_redirect(response)
     soup = BeautifulSoup(response.text, 'lxml')
-    header_text = soup.find('td', class_='ow_px_td').find('h1').text
-    filename = header_text.split('::')[0].strip()
-    return filename
+    header = soup.find('td', class_='ow_px_td').find('h1').text.split('::')
+    image = soup.find('div', class_='bookimage').find('img')['src']
+    return {
+       'title': header[0].strip(),
+       'author': header[1].strip(),
+       'image': urljoin(url, image)
+    }
 
 
 def download_txt(url, filename, folder='books/'):
     response = requests.get(url)
     response.raise_for_status()
     check_for_redirect(response)
-    filepath = os.path.join(folder,  f'{sanitize_filename(filename)}.txt')
+    filepath = os.path.join(folder, f'{sanitize_filename(filename)}.txt')
     with open(filepath, 'wb') as file:
+        file.write(response.content)
+
+
+def download_image(url, folder='images/'):
+    response = requests.get(url)
+    response.raise_for_status()
+    check_for_redirect(response)
+    image_name = urlsplit(unquote(url)).path.split("/")[-1]
+    image_path = os.path.join(folder, image_name)
+    with open(image_path, 'wb') as file:
         file.write(response.content)
         
 
 def main():
-    books_dir = 'books'
-    Path(books_dir).mkdir(parents=True, exist_ok=True)
+    books_dirs = ['books', 'images']
+    for books_dir in books_dirs:
+        Path(books_dir).mkdir(parents=True, exist_ok=True)
 
     for num in range(1, 11):
         try:
-            filename = parse_book_info(get_page_url(num))
-            download_txt(get_text_url(num), filename)
+            book = parse_book_info(get_page_url(num))
+            download_txt(get_text_url(num), book.title)
+            download_image(book['image'])
         except requests.HTTPError:
             continue
             
 
-
 if __name__ == '__main__':
     main()
-
-#    for num in range(1, 11):
-#        response = requests.get(get_text_url(num))
-#        response.raise_for_status()
-#        try:
-#            check_for_redirect(response)
-#        except requests.HTTPError:
-#            continue
-#        else:
-#            filename = f'{books_dir}\id{num}.txt'
-#            with open(filename, 'wb') as file:
-#                file.write(response.content)
 
