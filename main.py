@@ -26,10 +26,14 @@ def parse_book_info(url):
     soup = BeautifulSoup(response.text, 'lxml')
     header = soup.find('td', class_='ow_px_td').find('h1').text.split('::')
     image = soup.find('div', class_='bookimage').find('img')['src']
+    comments = list()
+    for texts in soup.find_all('div', class_='texts'):
+        comments.append(texts.find('span').text) 
     return {
        'title': header[0].strip(),
        'author': header[1].strip(),
-       'image': urljoin(url, image)
+       'image': urljoin(url, image),
+       'comments': comments,
     }
 
 
