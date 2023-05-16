@@ -25,13 +25,18 @@ def parse_book_info(url):
     check_for_redirect(response)
     soup = BeautifulSoup(response.text, 'lxml')
     header = soup.find('td', class_='ow_px_td').find('h1').text.split('::')
+    genres = [genre.text 
+              for genre 
+              in soup.find('span', class_='d_book').find_all('a')]
+    print(genres)
     image = soup.find('div', class_='bookimage').find('img')['src']
-    comments = list()
-    for texts in soup.find_all('div', class_='texts'):
-        comments.append(texts.find('span').text) 
+    comments = [texts.find('span').text 
+                for texts 
+                in soup.find_all('div', class_='texts')]
     return {
        'title': header[0].strip(),
        'author': header[1].strip(),
+       'genres': genres,
        'image': urljoin(url, image),
        'comments': comments,
     }
