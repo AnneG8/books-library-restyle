@@ -56,7 +56,7 @@ def parse_book_page(response):
        'title': header[0].strip(),
        'author': header[1].strip(),
        'genres': genres,
-       'image': urljoin(url, image),
+       'image': urljoin(response.url, image),
        'comments': comments,
     }
      
@@ -99,7 +99,7 @@ def main():
             download_txt(num, book['title'])
             download_image(book['image'])
         except requests.HTTPError:
-            missing_pages.append(num)
+            missing_pages.append(str(num))
     if missing_pages:
         print('Не были скачаны книги: ', ','.join(missing_pages))
             
