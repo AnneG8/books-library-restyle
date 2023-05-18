@@ -1,9 +1,32 @@
-import requests
 from pathlib import Path
 from bs4 import BeautifulSoup
 from pathvalidate import sanitize_filename
 from urllib.parse import urljoin, urlsplit, unquote
+import requests
 import os
+import argparse
+
+
+def check_positive(value):
+    #int_value = int(value)
+    if type(value) != int:
+        raise argparse.ArgumentTypeError("invalid int value: '%s'" % value)
+    if value <= 0:
+        raise argparse.ArgumentTypeError("invalid positive int value: '%s'" % value)
+    return value
+
+
+def createParser():
+    parser = argparse.ArgumentParser()
+    parser.add_argument('-s', '--start_id', 
+                        type=check_positive,
+                        default=1, const=1,   
+                        nargs='?')
+    parser.add_argument('-e', '--end_id', 
+                        type=check_positive,
+                        default=10, const=10,   
+                        nargs='?')
+    return parser
 
 
 def get_text_url(num):
@@ -19,7 +42,7 @@ def check_for_redirect(response):
         raise requests.HTTPError
 
 
-def parse_book_info(url):
+def parse_book_page(url):
     response = requests.get(url)
     response.raise_for_status()
     check_for_redirect(response)
@@ -28,7 +51,6 @@ def parse_book_info(url):
     genres = [genre.text 
               for genre 
               in soup.find('span', class_='d_book').find_all('a')]
-    print(genres)
     image = soup.find('div', class_='bookimage').find('img')['src']
     comments = [texts.find('span').text 
                 for texts 
@@ -40,13 +62,17 @@ def parse_book_info(url):
        'image': urljoin(url, image),
        'comments': comments,
     }
+     
 
 
-def download_txt(url, filename, folder='books/'):
+def download_txt(url, book_num, filename, folder='books/'):
     response = requests.get(url)
     response.raise_for_status()
     check_for_redirect(response)
-    filepath = os.path.join(folder, f'{sanitize_filename(filename)}.txt')
+    filepath = os.path.join(
+        folder, 
+        f'{book_num}. {sanitize_filename(filename)}.txt'
+    )
     with open(filepath, 'wb') as file:
         file.write(response.content)
 
@@ -66,10 +92,14 @@ def main():
     for books_dir in books_dirs:
         Path(books_dir).mkdir(parents=True, exist_ok=True)
 
-    for num in range(1, 11):
+    parser = createParser()
+    args = parser.parse_args()
+
+    print(args.start_id, args.end_id)
+    for num in range(args.start_id, args.end_id + 1):
         try:
-            book = parse_book_info(get_page_url(num))
-            download_txt(get_text_url(num), book.title)
+            book = parse_book_page(get_page_url(num))
+            download_txt(get_text_url(num), num, book['title'])
             download_image(book['image'])
         except requests.HTTPError:
             continue
