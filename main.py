@@ -8,7 +8,6 @@ import argparse
 
 
 def check_positive(value):
-    #int_value = int(value)
     if type(value) != int:
         raise argparse.ArgumentTypeError("invalid int value: '%s'" % value)
     if value <= 0:
@@ -30,7 +29,7 @@ def create_parser():
 
 
 def check_for_redirect(response):
-    if(response.history and response.history[-1].is_redirect):
+    if(response.history):
         raise requests.HTTPError
 
 
