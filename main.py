@@ -16,7 +16,7 @@ def check_positive(value):
     return value
 
 
-def createParser():
+def create_parser():
     parser = argparse.ArgumentParser()
     parser.add_argument('-s', '--start_id', 
                         type=check_positive,
@@ -27,14 +27,6 @@ def createParser():
                         default=10, const=10,   
                         nargs='?')
     return parser
-
-
-def get_text_url(num):
-    return f'https://tululu.org/txt.php?id={num}'
-
-
-def get_page_url(num):
-    return f'https://tululu.org/b{num}/'   
 
 
 def check_for_redirect(response):
@@ -64,7 +56,6 @@ def parse_book_page(url):
     }
      
 
-
 def download_txt(url, book_num, filename, folder='books/'):
     response = requests.get(url)
     response.raise_for_status()
@@ -92,14 +83,13 @@ def main():
     for books_dir in books_dirs:
         Path(books_dir).mkdir(parents=True, exist_ok=True)
 
-    parser = createParser()
+    parser = create_parser()
     args = parser.parse_args()
 
-    print(args.start_id, args.end_id)
     for num in range(args.start_id, args.end_id + 1):
         try:
-            book = parse_book_page(get_page_url(num))
-            download_txt(get_text_url(num), num, book['title'])
+            book = parse_book_page(f'https://tululu.org/b{num}/')
+            download_txt(f'https://tululu.org/txt.php?id={num}', num, book['title'])
             download_image(book['image'])
         except requests.HTTPError:
             continue
