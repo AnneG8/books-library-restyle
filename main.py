@@ -82,16 +82,21 @@ def main():
     parser = create_parser()
     args = parser.parse_args()
 
+    page_url = 'https://tululu.org/b{}/'
+    text_url = 'https://tululu.org/txt.php?id={}'
+    missing_pages = list()
     for num in range(args.start_id, args.end_id + 1):
         try:
-            response = requests.get(f'https://tululu.org/b{num}/')
+            response = requests.get(page_url.format(num))
             response.raise_for_status()
             check_for_redirect(response)
             book = parse_book_page(response)
-            download_txt(f'https://tululu.org/txt.php?id={num}', num, book['title'])
+            download_txt(text_url.format(num), num, book['title'])
             download_image(book['image'])
         except requests.HTTPError:
-            continue
+            missing_pages.append(num)
+    if missing_pages:
+        print('Не были скачаны книги: ', ','.join(missing_pages))
             
 
 if __name__ == '__main__':
