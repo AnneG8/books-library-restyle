@@ -9,9 +9,13 @@ import argparse
 
 def check_positive(value):
     if type(value) != int:
-        raise argparse.ArgumentTypeError("invalid int value: '%s'" % value)
+        raise argparse.ArgumentTypeError(
+            "invalid int value: '%s'" % value
+        )
     if value <= 0:
-        raise argparse.ArgumentTypeError("invalid positive int value: '%s'" % value)
+        raise argparse.ArgumentTypeError(
+            "invalid positive int value: '%s'" % value
+        )
     return value
 
 
@@ -33,6 +37,14 @@ def check_for_redirect(response):
         raise requests.HTTPError
 
 
+def get_page_response(num):
+    page_url = 'https://tululu.org/b{}/'
+    response = requests.get(page_url.format(num))
+    response.raise_for_status()
+    check_for_redirect(response)
+    return response;
+
+
 def parse_book_page(response):
     soup = BeautifulSoup(response.text, 'lxml')
     header = soup.find('td', class_='ow_px_td').find('h1').text.split('::')
@@ -52,8 +64,9 @@ def parse_book_page(response):
     }
      
 
-def download_txt(url, book_num, filename, folder='books/'):
-    response = requests.get(url)
+def download_txt(book_num, filename, folder='books/'):
+    payload = {'id': book_num}
+    response = requests.get('https://tululu.org/txt.php', params=payload)
     response.raise_for_status()
     check_for_redirect(response)
     filepath = os.path.join(
@@ -82,16 +95,11 @@ def main():
     parser = create_parser()
     args = parser.parse_args()
 
-    page_url = 'https://tululu.org/b{}/'
-    text_url = 'https://tululu.org/txt.php?id={}'
     missing_pages = list()
     for num in range(args.start_id, args.end_id + 1):
         try:
-            response = requests.get(page_url.format(num))
-            response.raise_for_status()
-            check_for_redirect(response)
-            book = parse_book_page(response)
-            download_txt(text_url.format(num), num, book['title'])
+            book = parse_book_page(get_page_response(num))
+            download_txt(num, book['title'])
             download_image(book['image'])
         except requests.HTTPError:
             missing_pages.append(num)
