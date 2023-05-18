@@ -8,15 +8,12 @@ import argparse
 
 
 def check_positive(value):
-    if type(value) != int:
+    int_value = int(value)
+    if int_value <= 0:
         raise argparse.ArgumentTypeError(
-            "invalid int value: '%s'" % value
+            "invalid positive int value: '%s'" % int_value
         )
-    if value <= 0:
-        raise argparse.ArgumentTypeError(
-            "invalid positive int value: '%s'" % value
-        )
-    return value
+    return int_value
 
 
 def create_parser():
