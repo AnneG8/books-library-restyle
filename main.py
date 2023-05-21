@@ -5,6 +5,7 @@ from urllib.parse import urljoin, urlsplit, unquote
 import requests
 import os
 import argparse
+import time
 
 
 def check_positive(value):
@@ -82,7 +83,7 @@ def download_image(url, folder='images/'):
     image_path = os.path.join(folder, image_name)
     with open(image_path, 'wb') as file:
         file.write(response.content)
-        
+
 
 def main():
     books_dirs = ['books', 'images']
@@ -94,12 +95,17 @@ def main():
 
     missing_pages = list()
     for num in range(args.start_id, args.end_id + 1):
-        try:
-            book = parse_book_page(get_page_response(num))
-            download_txt(num, book['title'])
-            download_image(book['image'])
-        except requests.HTTPError:
-            missing_pages.append(str(num))
+        while True:
+            try:
+                book = parse_book_page(get_page_response(num))
+                download_txt(num, book['title'])
+                download_image(book['image'])    
+                break
+            except requests.HTTPError:
+                missing_pages.append(str(num))
+                break
+            except requests.ConnectionError:
+                time.sleep(5)
     if missing_pages:
         print('Не были скачаны книги: ', ','.join(missing_pages))
             
