@@ -9,3 +9,4 @@ venv.bak/
 
 /books/
 /images/
+*.json
