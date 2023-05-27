@@ -37,13 +37,9 @@ def create_parser():
                         default='', const='',   
                         nargs='?')
     parser.add_argument('-skt', '--skip_txt', 
-                        type=bool,
-                        default=False, const=False,   
-                        nargs='?')
+                        action='store_true')
     parser.add_argument('-ski', '--skip_imgs', 
-                        type=bool,
-                        default=False, const=False,   
-                        nargs='?')
+                        action='store_true')
     return parser
 
 
