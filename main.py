@@ -42,22 +42,18 @@ def parse_genre_page(response):
     soup = BeautifulSoup(response.text, 'lxml')
     base_page_url = 'https://tululu.org/'
     book_urls = [
-        urljoin(base_page_url, book.find('tr').find('a')['href'])
-        for book in soup.find('td', class_='ow_px_td').find_all('table')
+        urljoin(base_page_url, book.select_one('a')['href'])
+        for book in soup.select('.d_book')
     ]
     return book_urls
 
 
 def parse_book_page(response):
     soup = BeautifulSoup(response.text, 'lxml')
-    header = soup.find('td', class_='ow_px_td').find('h1').text.split('::')
-    genres = [genre.text 
-              for genre 
-              in soup.find('span', class_='d_book').find_all('a')]
-    image = soup.find('div', class_='bookimage').find('img')['src']
-    comments = [texts.find('span').text 
-                for texts 
-                in soup.find_all('div', class_='texts')]
+    header = soup.select_one('.ow_px_td h1').text.split('::')
+    genres = [genre.text for genre in soup.select('span.d_book a')]
+    image = soup.select_one('.bookimage img')['src']
+    comments = [texts.text for texts in soup.select('.texts .black')]
     return {
        'title': header[0].strip(),
        'author': header[1].strip(),
