@@ -61,9 +61,15 @@ def prepare_dirs(dest_folder):
     return dirs
 
 
+def check_for_redirect(response):
+    if(response.history):
+        raise requests.HTTPError
+
+
 def get_response(url):
     response = requests.get(url)
     response.raise_for_status()
+    check_for_redirect(response)
     return response;
 
 
@@ -90,11 +96,6 @@ def parse_book_page(response):
        'comments': comments,
        'genres': genres
     }
-     
-
-def check_for_redirect(response):
-    if(response.history):
-        raise requests.HTTPError
 
 
 def download_txt(book_num, filename, folder):
@@ -127,6 +128,40 @@ def download_image(url, folder):
     return image_path
 
 
+def get_book(url, args, dirs):
+    book = parse_book_page(get_response(url))
+    url_path = urlsplit(unquote(url)).path
+    num = re.sub('[/b]', '', url_path)
+    if not args.skip_txt:
+        book['book_path'] = download_txt(num, book['title'], dirs['books'])
+    if (is_file_valid(book['book_path']) 
+        and not args.skip_imgs):
+        book['img_scr'] = download_image(book['img_url'], dirs['images'])
+        del book['img_url']
+        return book
+    return
+
+
+def get_books_from_page(page_num, args, dirs):
+    genre_page_url = 'https://tululu.org/l55/{}/'
+    book_urls = parse_genre_page(
+        get_response(genre_page_url.format(page_num))
+    )
+    page_books = list()
+    for url in book_urls:
+        while True:
+            try:
+                book = get_book(url, args, dirs)
+                if book:
+                    page_books.append(book)
+                break
+            except requests.HTTPError:
+                break
+            except requests.ConnectionError:
+                time.sleep(3)
+    return page_books
+
+
 def main():
     parser = create_parser()
     args = parser.parse_args()
@@ -137,32 +172,16 @@ def main():
         print(f'Не хватает прав доступа для {args.dest_folder}')
         return
 
-    genre_page_url = 'https://tululu.org/l55/{}/'
     books = list()
     for page_num in range(args.start_page, args.end_page + 1):
-        book_urls = parse_genre_page(
-            get_response(genre_page_url.format(page_num))
-        )
-        for url in book_urls:
-            while True:
-                try:
-                    book = parse_book_page(get_response(url))
-                    url_path = urlsplit(unquote(url)).path
-                    num = re.sub('[/b]', '', url_path)
-                    if not args.skip_txt:
-                        book['book_path'] = \
-                            download_txt(num, book['title'], dirs['books'])
-                    if (is_file_valid(book['book_path']) 
-                        and not args.skip_imgs):
-                        book['img_scr'] = \
-                            download_image(book['img_url'], dirs['images'])
-                        del book['img_url']
-                        books.append(book)
-                    break
-                except requests.HTTPError:
-                    break
-                except requests.ConnectionError:
-                    time.sleep(5)
+        while True:
+            try:
+                books.extend(get_books_from_page(page_num, args, dirs))
+                break
+            except requests.HTTPError:
+                break
+            except requests.ConnectionError:
+                time.sleep(3)
     
     book_list_json = json.dumps(books, ensure_ascii=False, indent=2)
     json_name = Path(args.json_path, 'book_list.json')
