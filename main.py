@@ -7,6 +7,7 @@ import argparse
 import re
 import time
 import json
+import logging
 
 
 def check_non_negative(value):
@@ -62,8 +63,8 @@ def prepare_dirs(dest_folder):
 
 
 def check_for_redirect(response):
-    if(response.history):
-        raise requests.HTTPError
+    if response.history:
+        raise requests.HTTPError(response.history[-1].url)
 
 
 def get_response(url):
@@ -134,8 +135,7 @@ def get_book(url, args, dirs):
     num = re.sub('[/b]', '', url_path)
     if not args.skip_txt:
         book['book_path'] = download_txt(num, book['title'], dirs['books'])
-    if (is_file_valid(book['book_path']) 
-        and not args.skip_imgs):
+    if is_file_valid(book['book_path']) and not args.skip_imgs:
         book['img_scr'] = download_image(book['img_url'], dirs['images'])
         del book['img_url']
         return book
@@ -155,9 +155,12 @@ def get_books_from_page(page_num, args, dirs):
                 if book:
                     page_books.append(book)
                 break
-            except requests.HTTPError:
+            except requests.HTTPError as err:
+                logging.info('Не найдена страница книги '
+                             f'{urlsplit(str(err)).query}.')
                 break
             except requests.ConnectionError:
+                print('Не удается установить связь с tululu.org')
                 time.sleep(3)
     return page_books
 
@@ -179,8 +182,10 @@ def main():
                 books.extend(get_books_from_page(page_num, args, dirs))
                 break
             except requests.HTTPError:
+                logging.info(f'Не найдена {page_num} страница жанра.')
                 break
             except requests.ConnectionError:
+                print('Не удается установить связь с tululu.org')
                 time.sleep(3)
     
     book_list_json = json.dumps(books, ensure_ascii=False, indent=2)
