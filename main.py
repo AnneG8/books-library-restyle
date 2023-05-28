@@ -23,30 +23,30 @@ def create_parser():
     parser = argparse.ArgumentParser(
         description='Download sci-fi books from tululu.org, page by page.'
                     'One page contains about 25 books')
-    parser.add_argument('-s', '--start_page', 
+    parser.add_argument('-s', '--start_page',
                         type=check_non_negative,
-                        default=1, const=1,   
+                        default=1, const=1,
                         nargs='?',
                         help='first page number')
-    parser.add_argument('-e', '--end_page', 
+    parser.add_argument('-e', '--end_page',
                         type=check_non_negative,
-                        default=4, const=4,   
+                        default=4, const=4,
                         nargs='?',
                         help='last page number')
-    parser.add_argument('-f', '--dest_folder', 
+    parser.add_argument('-f', '--dest_folder',
                         type=str,
-                        default='', const='',   
+                        default='', const='',
                         nargs='?',
                         help='choose dest folder for books and images')
-    parser.add_argument('-j', '--json_path', 
+    parser.add_argument('-j', '--json_path',
                         type=str,
-                        default='', const='',   
+                        default='', const='',
                         nargs='?',
                         help='choose book_list.json')
-    parser.add_argument('-skt', '--skip_txt', 
+    parser.add_argument('-skt', '--skip_txt',
                         action='store_true',
                         help='allows to refuse download books')
-    parser.add_argument('-ski', '--skip_imgs', 
+    parser.add_argument('-ski', '--skip_imgs',
                         action='store_true',
                         help='allows to refuse download images')
     return parser
@@ -71,7 +71,7 @@ def get_response(url):
     response = requests.get(url)
     response.raise_for_status()
     check_for_redirect(response)
-    return response;
+    return response
 
 
 def parse_genre_page(response):
@@ -105,7 +105,7 @@ def download_txt(book_num, filename, folder):
     response.raise_for_status()
     check_for_redirect(response)
     filepath = str(Path(
-        folder, 
+        folder,
         f'{book_num}. {sanitize_filename(filename)}.txt'
     ))
     with open(filepath, 'wb') as file:
@@ -187,13 +187,12 @@ def main():
             except requests.ConnectionError:
                 print('Не удается установить связь с tululu.org')
                 time.sleep(3)
-    
+
     book_list_json = json.dumps(books, ensure_ascii=False, indent=2)
     json_path = Path(args.json_path, 'book_list.json')
     with open(json_path, 'w', encoding='utf8') as file:
         file.write(book_list_json)
-            
+
 
 if __name__ == '__main__':
     main()
-
