@@ -19,27 +19,35 @@ def check_non_negative(value):
 
 
 def create_parser():
-    parser = argparse.ArgumentParser()
+    parser = argparse.ArgumentParser(
+        description='Download sci-fi books from tululu.org, page by page.'
+                    'One page contains about 25 books')
     parser.add_argument('-s', '--start_page', 
                         type=check_non_negative,
                         default=1, const=1,   
-                        nargs='?')
+                        nargs='?',
+                        help='first page number')
     parser.add_argument('-e', '--end_page', 
                         type=check_non_negative,
                         default=4, const=4,   
-                        nargs='?')
+                        nargs='?',
+                        help='last page number')
     parser.add_argument('-f', '--dest_folder', 
                         type=str,
                         default='', const='',   
-                        nargs='?')
+                        nargs='?',
+                        help='choose dest folder for books and images')
     parser.add_argument('-j', '--json_path', 
                         type=str,
                         default='', const='',   
-                        nargs='?')
+                        nargs='?',
+                        help='choose book_list.json')
     parser.add_argument('-skt', '--skip_txt', 
-                        action='store_true')
+                        action='store_true',
+                        help='allows to refuse download books')
     parser.add_argument('-ski', '--skip_imgs', 
-                        action='store_true')
+                        action='store_true',
+                        help='allows to refuse download images')
     return parser
 
 
