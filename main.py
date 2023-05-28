@@ -189,9 +189,9 @@ def main():
                 time.sleep(3)
     
     book_list_json = json.dumps(books, ensure_ascii=False, indent=2)
-    json_name = Path(args.json_path, 'book_list.json')
-    with open(json_name, 'w', encoding='utf8') as my_file:
-        my_file.write(book_list_json)
+    json_path = Path(args.json_path, 'book_list.json')
+    with open(json_path, 'w', encoding='utf8') as file:
+        file.write(book_list_json)
             
 
 if __name__ == '__main__':
