@@ -52,16 +52,6 @@ def create_parser():
     return parser
 
 
-def prepare_dirs(dest_folder):
-    dirs = {
-        'books': Path(dest_folder) / 'books' / '',
-        'images': Path(dest_folder) / 'images' / ''
-    }
-    for file_dir in dirs:
-        Path(file_dir).mkdir(parents=True, exist_ok=True)
-    return dirs
-
-
 def check_for_redirect(response):
     if response.history:
         raise requests.HTTPError(response.history[-1].url)
@@ -129,20 +119,20 @@ def download_image(url, folder):
     return image_path
 
 
-def get_book(url, args, dirs):
+def get_book(url, args, book_path, images_path):
     book = parse_book_page(get_response(url))
     url_path = urlsplit(unquote(url)).path
     num = re.sub('[/b]', '', url_path)
     if not args.skip_txt:
-        book['book_path'] = download_txt(num, book['title'], dirs['books'])
+        book['book_path'] = download_txt(num, book['title'], book_path)
     if is_file_valid(book['book_path']) and not args.skip_imgs:
-        book['img_scr'] = download_image(book['img_url'], dirs['images'])
+        book['img_scr'] = download_image(book['img_url'], images_path)
         del book['img_url']
         return book
     return
 
 
-def get_books_from_page(page_num, args, dirs):
+def get_books_from_page(page_num, args, book_path, images_path):
     genre_page_url = 'https://tululu.org/l55/{}/'
     book_urls = parse_genre_page(
         get_response(genre_page_url.format(page_num))
@@ -151,7 +141,7 @@ def get_books_from_page(page_num, args, dirs):
     for url in book_urls:
         while True:
             try:
-                book = get_book(url, args, dirs)
+                book = get_book(url, args, book_path, images_path)
                 if book:
                     page_books.append(book)
                 break
@@ -170,16 +160,29 @@ def main():
     args = parser.parse_args()
 
     try:
-        dirs = prepare_dirs(args.dest_folder)
+        book_path = Path(args.dest_folder) / 'books' / ''
+        images_path = Path(args.dest_folder) / 'images' / ''
+        Path(book_path).mkdir(parents=True, exist_ok=True)
+        Path(images_path).mkdir(parents=True, exist_ok=True)
     except PermissionError:
         print(f'Не хватает прав доступа для {args.dest_folder}')
+        return
+
+    try:
+        Path(images_path).mkdir(parents=True, exist_ok=True)
+        json_path = Path(args.json_path, 'book_list.json')
+    except PermissionError:
+        print(f'Не хватает прав доступа для {args.json_path}')
         return
 
     books = list()
     for page_num in range(args.start_page, args.end_page + 1):
         while True:
             try:
-                books.extend(get_books_from_page(page_num, args, dirs))
+                page_books = get_books_from_page(
+                    page_num, args, 
+                    book_path, images_path)
+                books.extend(page_books)
                 break
             except requests.HTTPError:
                 logging.info(f'Не найдена {page_num} страница жанра.')
@@ -188,10 +191,8 @@ def main():
                 print('Не удается установить связь с tululu.org')
                 time.sleep(3)
 
-    book_list_json = json.dumps(books, ensure_ascii=False, indent=2)
-    json_path = Path(args.json_path, 'book_list.json')
     with open(json_path, 'w', encoding='utf8') as file:
-        file.write(book_list_json)
+        json.dump(books, file, ensure_ascii=False, indent=2)
 
 
 if __name__ == '__main__':
