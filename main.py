@@ -10,6 +10,10 @@ import json
 import logging
 
 
+class EmptyBookError(TypeError):
+    pass
+
+
 def check_non_negative(value):
     int_value = int(value)
     if int_value < 0:
@@ -129,7 +133,7 @@ def get_book(url, args, book_path, images_path):
         book['img_scr'] = download_image(book['img_url'], images_path)
         del book['img_url']
         return book
-    return
+    raise EmptyBookError
 
 
 def get_books_from_page(page_num, args, book_path, images_path):
@@ -142,8 +146,9 @@ def get_books_from_page(page_num, args, book_path, images_path):
         while True:
             try:
                 book = get_book(url, args, book_path, images_path)
-                if book:
-                    page_books.append(book)
+                page_books.append(book)
+                break
+            except EmptyBookError:
                 break
             except requests.HTTPError as err:
                 logging.info('Не найдена страница книги '
@@ -180,7 +185,7 @@ def main():
         while True:
             try:
                 page_books = get_books_from_page(
-                    page_num, args, 
+                    page_num, args,
                     book_path, images_path)
                 books.extend(page_books)
                 break
