@@ -58,7 +58,7 @@ def create_parser():
 
 def check_for_redirect(response):
     if response.history:
-        raise requests.HTTPError(response.history[-1].url)
+        raise requests.HTTPError
 
 
 def get_response(url):
@@ -123,41 +123,46 @@ def download_image(url, folder):
     return image_path
 
 
-def get_book(url, args, book_path, images_path):
+def get_book(url, skip_txt, skip_imgs, book_path, images_path):
     book = parse_book_page(get_response(url))
     url_path = urlsplit(unquote(url)).path
     num = re.sub('[/b]', '', url_path)
-    if not args.skip_txt:
+    if not skip_txt:
         book['book_path'] = download_txt(num, book['title'], book_path)
-    if is_file_valid(book['book_path']) and not args.skip_imgs:
+    if is_file_valid(book['book_path']) and not skip_imgs:
         book['img_scr'] = download_image(book['img_url'], images_path)
         del book['img_url']
         return book
     raise EmptyBookError
 
 
-def get_books_from_page(page_num, args, book_path, images_path):
+def get_books_from_page(page_num, skip_txt, skip_imgs,
+                        book_path, images_path):
     genre_page_url = 'https://tululu.org/l55/{}/'
     book_urls = parse_genre_page(
         get_response(genre_page_url.format(page_num))
     )
     page_books = list()
+    missing_pages = list()
     for url in book_urls:
         while True:
             try:
-                book = get_book(url, args, book_path, images_path)
+                book = get_book(url,
+                                skip_txt, skip_imgs,
+                                book_path, images_path)
                 page_books.append(book)
                 break
             except EmptyBookError:
+                missing_pages.append(urlsplit(url).query)
                 break
-            except requests.HTTPError as err:
+            except requests.HTTPError:
                 logging.info('Не найдена страница книги '
-                             f'{urlsplit(str(err)).query}.')
+                             f'{urlsplit(url).query}.')
                 break
             except requests.ConnectionError:
                 print('Не удается установить связь с tululu.org')
                 time.sleep(3)
-    return page_books
+    return page_books, missing_pages
 
 
 def main():
@@ -181,13 +186,15 @@ def main():
         return
 
     books = list()
+    missing_book_pages = list()
     for page_num in range(args.start_page, args.end_page + 1):
         while True:
             try:
-                page_books = get_books_from_page(
-                    page_num, args,
+                page_books, missing_pages = get_books_from_page(
+                    page_num, args.skip_txt, args.skip_imgs,
                     book_path, images_path)
                 books.extend(page_books)
+                missing_book_pages.extend(missing_pages)
                 break
             except requests.HTTPError:
                 logging.info(f'Не найдена {page_num} страница жанра.')
@@ -198,6 +205,9 @@ def main():
 
     with open(json_path, 'w', encoding='utf8') as file:
         json.dump(books, file, ensure_ascii=False, indent=2)
+
+    if missing_book_pages:
+        print('Не были скачаны книги: ', ','.join(missing_book_pages))
 
 
 if __name__ == '__main__':
