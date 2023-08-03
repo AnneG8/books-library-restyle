@@ -98,10 +98,8 @@ def download_txt(book_num, filename, folder):
     response = requests.get('https://tululu.org/txt.php', params=payload)
     response.raise_for_status()
     check_for_redirect(response)
-    filepath = str(Path(
-        folder,
-        f'{book_num}. {sanitize_filename(filename)}.txt'
-    ))
+    filename = f'{book_num}. {sanitize_filename(filename)}.txt'
+    filepath = str(Path(folder, filename))
     with open(filepath, 'wb') as file:
         file.write(response.content)
     return filepath
@@ -179,8 +177,8 @@ def main():
         return
 
     try:
-        Path(images_path).mkdir(parents=True, exist_ok=True)
         json_path = Path(args.json_path, 'book_list.json')
+        Path(json_path).mkdir(parents=True, exist_ok=True)
     except PermissionError:
         print(f'Не хватает прав доступа для {args.json_path}')
         return
