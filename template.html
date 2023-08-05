@@ -11,27 +11,33 @@
     <title>Hello, world!</title>
   </head>
   <body>
-    <!-- <h1>Hello, world!</h1> -->
-    {% for book in books %}
-      <div class="card mb-3" style="max-width: 540px;">
-        <div class="row no-gutters">
-          <div class="col-md-4">
-            {% if book.img_scr %}
-              <img src="{{ book.img_scr }}" class="card-img" alt="{{book.author}} :: {{book.title}}">
-            {% else %}
-              <img src="{{static/nopic.gif}}" class="card-img" alt="{{book.author}} :: {{book.title}}">
-            {% endif %}
-          </div>
-          <div class="col-md-8">
-            <div class="card-body">
-              <h5 class="book-title">{{book.title}}</h5>
-              <p class="card-text">{{book.author}}</p>
-              <p class="card-text"><small class="text-muted">Last updated 3 mins ago</small></p>
+    <div class="container">
+      <div class="row">
+        {% for pair_of_books in books %}
+          {% for book in pair_of_books %}
+            <div class="col-md-6" style="max-width: 540px;">
+              <div class="row no-gutters">
+                <div class="col-md-4">
+                  {% if book.img_scr %}
+                    <img src="{{ book.img_scr }}" class="card-img" alt="{{book.author}} :: {{book.title}}">
+                  {% else %}
+                    <img src="{{static/nopic.gif}}" class="card-img" alt="{{book.author}} :: {{book.title}}">
+                  {% endif %}
+                </div>
+                <div class="col-md-8">
+                  <div class="card-body">
+                    <h5 class="book-title">{{book.title}}</h5>
+                    <p class="card-text">{{book.author}}</p>
+                    <p class="card-text"><small class="text-muted">Last updated 3 mins ago</small></p>
+                  </div>
+                </div>
+              </div>
             </div>
-          </div>
-        </div>
+          {% endfor %}
+          <div class="w-100"></div>
+        {% endfor %}
       </div>
-    {% endfor %}
+    </div>
 
     <!-- Optional JavaScript -->
     <!-- jQuery first, then Popper.js, then Bootstrap JS -->

@@ -1,12 +1,13 @@
 from jinja2 import Environment, FileSystemLoader, select_autoescape
 from pathlib import Path
 from livereload import Server, shell
+from more_itertools import chunked
 import argparse
 import json
 import re
 import os
 
-
+ 
 def create_parser():
     parser = argparse.ArgumentParser(
         description='Download sci-fi books from tululu.org, page by page.'
@@ -37,7 +38,7 @@ def on_reload(books):
                       autoescape=select_autoescape(['html', 'xml']))
     template = env.get_template('template.html')
     rendered_page = template.render(books=books)
-    with open('pages/index.html', 'w', encoding="utf8") as file:
+    with open('index.html', 'w', encoding="utf8") as file:
         file.write(rendered_page)
 
 
@@ -63,6 +64,7 @@ def main():
 
     with open(json_path, 'r', encoding='utf8') as file:
         books = json.load(file)
+    books = list(chunked(books, 2))
     on_reload(books)
 
     server = Server()
