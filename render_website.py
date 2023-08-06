@@ -6,6 +6,7 @@ import argparse
 import json
 import re
 import os
+BOOKS_ON_PAGE = 20
 
  
 def create_parser():
@@ -33,13 +34,27 @@ def check_path(path):
     return
 
 
-def on_reload(books):
+def on_reload(json_path, folder='pages'):
     env = Environment(loader=FileSystemLoader('.'),
                       autoescape=select_autoescape(['html', 'xml']))
     template = env.get_template('template.html')
-    rendered_page = template.render(books=books)
-    with open('index.html', 'w', encoding="utf8") as file:
-        file.write(rendered_page)
+
+    Path(folder).mkdir(parents=True, exist_ok=True)
+    with open(json_path, 'r', encoding='utf8') as file:
+        books = json.load(file)
+
+    books = list(chunked(books, BOOKS_ON_PAGE))
+    for num, book_set in enumerate(books, 1):
+        book_set = list(chunked(book_set, 2))
+        rendered_page = template.render(
+            book_set=book_set,
+            page_number=num,
+            pages_count=len(books)
+        )
+
+        filename = Path(folder, f'index{num}.html')
+        with open(filename, 'w', encoding="utf8") as file:
+            file.write(rendered_page)
 
 
 def main():
@@ -62,13 +77,10 @@ def main():
         print(f'Недостаточно прав доступа для чтения {path}')
         return
 
-    with open(json_path, 'r', encoding='utf8') as file:
-        books = json.load(file)
-    books = list(chunked(books, 2))
-    on_reload(books)
+    on_reload(json_path)
 
     server = Server()
-    server.watch('template.html', on_reload(books))
+    server.watch('template.html', on_reload(json_path))
     server.serve(root='.')
 
 

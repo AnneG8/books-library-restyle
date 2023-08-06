@@ -13,7 +13,7 @@
   <body>
     <div class="container">
       <div class="row">
-        {% for pair_of_books in books %}
+        {% for pair_of_books in book_set %}
           {% for book in pair_of_books %}
             <div class="col">
               <div class="card" style="max-width: 540px;">
@@ -22,7 +22,7 @@
                     {% if book.img_scr %}
                       <img src="{{book.img_scr | urlencode}}" class="card-img" alt="{{book.author}} :: {{book.title}}">
                     {% else %}
-                      <img src="{{static/nopic.gif}}" class="card-img" alt="{{book.author}} :: {{book.title}}">
+                      <img src="{{static/nopic.gif | urlencode}}" class="card-img" alt="{{book.author}} :: {{book.title}}">
                     {% endif %}
                   </div>
                   <div class="col-md-8">
