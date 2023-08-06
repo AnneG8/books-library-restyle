@@ -68,7 +68,7 @@ def main():
     on_reload(books)
 
     server = Server()
-    server.watch('template.html', on_reload)
+    server.watch('template.html', on_reload(books))
     server.serve(root='.')
 
 
