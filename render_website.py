@@ -62,6 +62,12 @@ def on_reload(json_path, folder=PAGES_FOLDER):
             file.write(rendered_page)
 
 
+def add_path(func, json_path):
+    def _wrapper():
+        func(json_path)
+    return _wrapper
+
+
 def main():
     parser = create_parser()
     args = parser.parse_args()
@@ -87,7 +93,7 @@ def main():
     on_reload(json_path)
 
     server = Server()
-    server.watch('template.html', on_reload(json_path))
+    server.watch('template.html', add_path(on_reload, json_path))
     first_page_path = str(Path(PAGES_FOLDER, 'index1.html'))
     server.serve(root=PAGES_FOLDER, default_filename=first_page_path)
     # server.serve(root='.')
