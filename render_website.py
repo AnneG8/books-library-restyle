@@ -7,6 +7,7 @@ import json
 import re
 import os
 BOOKS_ON_PAGE = 20
+PAGES_FOLDER = 'pages\\'
 
  
 def create_parser():
@@ -34,14 +35,18 @@ def check_path(path):
     return
 
 
-def on_reload(json_path, folder='pages'):
+def on_reload(json_path, folder=PAGES_FOLDER):
     env = Environment(loader=FileSystemLoader('.'),
                       autoescape=select_autoescape(['html', 'xml']))
     template = env.get_template('template.html')
 
-    Path(folder).mkdir(parents=True, exist_ok=True)
     with open(json_path, 'r', encoding='utf8') as file:
         books = json.load(file)
+
+    # books = list(chunked(books, 2))
+    # rendered_page = template.render(books=books)
+    # with open('index.html', 'w', encoding="utf8") as file:
+    #     file.write(rendered_page)
 
     books = list(chunked(books, BOOKS_ON_PAGE))
     for num, book_set in enumerate(books, 1):
@@ -77,13 +82,15 @@ def main():
         print(f'Недостаточно прав доступа для чтения {path}')
         return
 
+    Path(PAGES_FOLDER).mkdir(parents=True, exist_ok=True)
+
     on_reload(json_path)
 
     server = Server()
     server.watch('template.html', on_reload(json_path))
-    server.serve(root='.')
-
-
+    first_page_path = str(Path(PAGES_FOLDER, 'index1.html'))
+    server.serve(root=PAGES_FOLDER, default_filename=first_page_path)
+    # server.serve(root='.')
 
 
 if __name__ == '__main__':
