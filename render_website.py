@@ -35,18 +35,17 @@ def check_path(path):
     return
 
 
-def on_reload(json_path, folder=PAGES_FOLDER):
+def on_reload(json_path, dest_folder, folder=PAGES_FOLDER):
     env = Environment(loader=FileSystemLoader('.'),
                       autoescape=select_autoescape(['html', 'xml']))
     template = env.get_template('template.html')
 
     with open(json_path, 'r', encoding='utf8') as file:
         books = json.load(file)
-
-    # books = list(chunked(books, 2))
-    # rendered_page = template.render(books=books)
-    # with open('index.html', 'w', encoding="utf8") as file:
-    #     file.write(rendered_page)
+    for book in books:
+        book['book_path'] = str(Path(dest_folder, book['book_path']))
+        book['img_scr'] = str(Path(dest_folder, book['img_scr']))
+    print(books[0]['img_scr'])
 
     books = list(chunked(books, BOOKS_ON_PAGE))
     for num, book_set in enumerate(books, 1):
@@ -62,9 +61,9 @@ def on_reload(json_path, folder=PAGES_FOLDER):
             file.write(rendered_page)
 
 
-def add_path(func, json_path):
+def add_path(func, json_path, dest_folder):
     def _wrapper():
-        func(json_path)
+        func(json_path, dest_folder)
     return _wrapper
 
 
@@ -72,12 +71,11 @@ def main():
     parser = create_parser()
     args = parser.parse_args()
 
-    book_path = Path(args.dest_folder) / 'books' / ''       # может вызвать ошибку?
-    images_path = Path(args.dest_folder) / 'images' / ''
+    dest_folder = Path(args.dest_folder)
     json_path = Path(args.json_path, 'book_list.json')
     try:
-        check_path(book_path)
-        check_path(images_path)
+        check_path(Path(dest_folder) / 'books' / '')
+        check_path(Path(dest_folder) / 'images' / '')
         check_path(json_path)
     except FileNotFoundError as err:
         path = err.args[0]
@@ -90,13 +88,14 @@ def main():
 
     Path(PAGES_FOLDER).mkdir(parents=True, exist_ok=True)
 
-    on_reload(json_path)
+    on_reload(json_path, dest_folder)
 
     server = Server()
-    server.watch('template.html', add_path(on_reload, json_path))
-    first_page_path = str(Path(PAGES_FOLDER, 'index1.html'))
-    server.serve(root=PAGES_FOLDER, default_filename=first_page_path)
-    # server.serve(root='.')
+    server.watch('template.html', 
+                 add_path(on_reload, json_path, dest_folder))
+    # server.watch('render_website.ry', 
+    #              add_path(on_reload, json_path, dest_folder))
+    server.serve(root=PAGES_FOLDER, default_filename='index1.html')
 
 
 if __name__ == '__main__':
