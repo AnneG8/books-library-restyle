@@ -44,8 +44,9 @@ def on_reload(json_path, dest_folder, folder=PAGES_FOLDER):
         books = json.load(file)
     for book in books:
         book['book_path'] = str(Path(dest_folder, book['book_path']))
-        book['img_scr'] = str(Path(dest_folder, book['img_scr']))
-    print(books[0]['img_scr'])
+        if book.get('img_scr'):
+            book['img_scr'] = str(Path(dest_folder, book['img_scr']))
+    print(books[1]['img_scr'])
 
     books = list(chunked(books, BOOKS_ON_PAGE))
     for num, book_set in enumerate(books, 1):
@@ -71,7 +72,7 @@ def main():
     parser = create_parser()
     args = parser.parse_args()
 
-    dest_folder = Path(args.dest_folder)
+    dest_folder = args.dest_folder
     json_path = Path(args.json_path, 'book_list.json')
     try:
         check_path(Path(dest_folder) / 'books' / '')
