@@ -31,7 +31,7 @@
                     {% if book.img_scr %}
                       <img src="/{{ book.img_scr | replace('\\','/') }}" class="card-img" alt="{{book.author}} :: {{book.title}}">
                     {% else %}
-                      <img src="{{ static/nopic.gif }}" class="card-img" alt="{{book.author}} :: {{book.title}}">
+                      <img src="/static/nopic.gif" class="card-img" alt="{{book.author}} :: {{book.title}}">
                     {% endif %}
                   </div>
                   <div class="col-md-8">
