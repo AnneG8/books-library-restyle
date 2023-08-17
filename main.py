@@ -178,7 +178,7 @@ def main():
 
     try:
         json_path = Path(args.json_path, 'book_list.json')
-        Path(json_path).mkdir(parents=True, exist_ok=True)
+        Path(args.json_path).mkdir(parents=True, exist_ok=True)
     except PermissionError:
         print(f'Не хватает прав доступа для {args.json_path}')
         return
