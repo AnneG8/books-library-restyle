@@ -1,6 +1,6 @@
-requests==2.30.*
-beautifulsoup4==4.12.*
-lxml==4.9.*
+requests==2.30.0
+beautifulsoup4==4.12.2
+lxml==4.9.2
 pathvalidate==2.5.2
 jinja2==2.1.2
 livereload-2.6.3
