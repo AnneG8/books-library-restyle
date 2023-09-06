@@ -4,8 +4,10 @@ from livereload import Server, shell
 from more_itertools import chunked
 import argparse
 import json
-import re
+# import re
 import os
+
+
 BOOKS_ON_PAGE = 20
 PAGES_FOLDER = 'pages\\'
 
@@ -46,7 +48,6 @@ def on_reload(json_path, dest_folder, folder=PAGES_FOLDER):
         book['book_path'] = str(Path(dest_folder, book['book_path']))
         if book.get('img_scr'):
             book['img_scr'] = str(Path(dest_folder, book['img_scr']))
-    print(books[1]['img_scr'])
 
     books = list(chunked(books, BOOKS_ON_PAGE))
     for num, book_set in enumerate(books, 1):
@@ -96,7 +97,7 @@ def main():
                  add_path(on_reload, json_path, dest_folder))
     # server.watch('render_website.ry', 
     #              add_path(on_reload, json_path, dest_folder))
-    server.serve(root=PAGES_FOLDER, default_filename='index1.html')
+    server.serve(root='.', default_filename='index1.html')
 
 
 if __name__ == '__main__':

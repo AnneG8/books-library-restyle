@@ -11,16 +11,30 @@
     <title>Hello, world!</title>
   </head>
   <body>
-    <nav aria-label="Page navigation example">
-      <ul class="pagination">
-        <li class="page-item"><a class="page-link" href="#">Previous</a></li>
-        <li class="page-item"><a class="page-link" href="#">1</a></li>
-        <li class="page-item"><a class="page-link" href="#">2</a></li>
-        <li class="page-item"><a class="page-link" href="#">3</a></li>
-        <li class="page-item"><a class="page-link" href="#">Next</a></li>
-      </ul>
-    </nav>
     <div class="container">
+      <nav aria-label="Page navigation example">
+        <ul class="pagination" style="margin-top:20px;">
+          {% if page_number == 1 %}
+            <li class="page-item disabled"><span class="page-link">Назад</span></li>
+          {% else %}
+            <li class="page-item"><a class="page-link" href="index{{page_number - 1}}.html">Назад</a></li>
+          {% endif %}
+          {% for num in range(1, pages_count + 1) %}
+            {% if num == page_number %}
+              <li class="page-item active" aria-current="page">
+                <a class="page-link" href="index{{num}}.html">{{num}}</a>
+              </li>
+            {% else %}
+              <li class="page-item"><a class="page-link" href="index{{num}}.html">{{num}}</a></li>
+            {% endif %}
+          {% endfor %}
+          {% if page_number == pages_count %}
+            <li class="page-item disabled"><span class="page-link">Вперёд</span></li>
+          {% else %}
+            <li class="page-item"><a class="page-link" href="index{{page_number + 1}}.html">Вперёд</a></li>
+          {% endif %}
+        </ul>
+      </nav>
       <div class="row">
         {% for pair_of_books in book_set %}
           {% for book in pair_of_books %}
@@ -38,7 +52,7 @@
                     <div class="card-body">
                       <h5 class="book-title">{{book.title}}</h5>
                       <p class="card-text">{{book.author}}</p>
-                      <a href="/{{book.book_path | replace('\\','/') }}" target="_blank">Читать</a>
+                      <a href="/{{book.book_path | replace('\\','/') | replace(' ','%20') }}" target="_blank">Читать</a>
                       <p class="card-text"><small class="text-muted">Last updated 3 mins ago</small></p>
                     </div>
                   </div>
