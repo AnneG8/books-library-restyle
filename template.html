@@ -39,7 +39,7 @@
         {% for pair_of_books in book_set %}
           {% for book in pair_of_books %}
             <div class="col">
-              <div class="card" style="max-width: 540px;">
+              <div class="card mb-3" style="max-width: 540px;">
                 <div class="row no-gutters">
                   <div class="col-md-4">
                     {% if book.img_scr %}
@@ -52,8 +52,12 @@
                     <div class="card-body">
                       <h5 class="book-title">{{book.title}}</h5>
                       <p class="card-text">{{book.author}}</p>
+                      <p>
+                        {% for genre in book.genres[:3] %}
+                          <span class="badge badge-light">{{genre}}</span>
+                        {% endfor %}
+                      </p>
                       <a href="/{{book.book_path | replace('\\','/') | replace(' ','%20') }}" target="_blank">Читать</a>
-                      <p class="card-text"><small class="text-muted">Last updated 3 mins ago</small></p>
                     </div>
                   </div>
                 </div>
