@@ -2,13 +2,13 @@
 <html lang="ru">
   <head>
     <title>"Библиотека книг о фантастике"</title>
-    <link rel="icon" type="image/png" href="/static/lg.png" sizes="62x62">
+    <link rel="icon" type="image/png" href="../static/lg.png" sizes="62x62">
     <!-- Required meta tags -->
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 
     <!-- Bootstrap CSS -->
-    <link rel="stylesheet" href="/static/css/bootstrap.min.css">
+    <link rel="stylesheet" href="../static/css/bootstrap.min.css">
 
     <title>Hello, world!</title>
   </head>
@@ -45,9 +45,9 @@
                 <div class="row no-gutters">
                   <div class="col-md-4">
                     {% if book.img_scr %}
-                      <img src="/{{ book.img_scr | replace('\\','/') }}" class="card-img" alt="{{book.author}} :: {{book.title}}">
+                      <img src="../{{ book.img_scr | replace('\\','/') }}" class="card-img" alt="{{book.author}} :: {{book.title}}">
                     {% else %}
-                      <img src="/static/nopic.gif" class="card-img" alt="{{book.author}} :: {{book.title}}">
+                      <img src="../static/nopic.gif" class="card-img" alt="{{book.author}} :: {{book.title}}">
                     {% endif %}
                   </div>
                   <div class="col-md-8">
@@ -59,7 +59,7 @@
                           <span class="badge badge-light">{{genre}}</span>
                         {% endfor %}
                       </p>
-                      <a href="/{{book.book_path | replace('\\','/') | replace(' ','%20') }}" target="_blank">Читать</a>
+                      <a href="../{{book.book_path | replace('\\','/') | replace(' ','%20') }}" target="_blank">Читать</a>
                     </div>
                   </div>
                 </div>
@@ -73,8 +73,8 @@
 
     <!-- Optional JavaScript -->
     <!-- jQuery first, then Popper.js, then Bootstrap JS -->
-    <script src="/static/js/jquery-3.3.1.slim.min.js"></script>
-    <script src="/static/js/popper.min.js"></script>
-    <script src="/static/js/bootstrap.min.js"></script>
+    <script src="../static/js/jquery-3.3.1.slim.min.js"></script>
+    <script src="../static/js/popper.min.js"></script>
+    <script src="../static/js/bootstrap.min.js"></script>
   </body>
 </html>
