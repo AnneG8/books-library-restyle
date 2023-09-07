@@ -7,8 +7,8 @@ ENV/
 env.bak/
 venv.bak/
 
-/books/
-/images/
-*.json
+# /books/
+# /images/
+# *.json
 
-pages/
+# pages/
