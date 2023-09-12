@@ -4,7 +4,6 @@ from livereload import Server, shell
 from more_itertools import chunked
 import argparse
 import json
-# import re
 import os
 
 
@@ -51,7 +50,8 @@ def on_reload(json_path, dest_folder, folder=PAGES_FOLDER):
 
     books = list(chunked(books, BOOKS_ON_PAGE))
     for num, book_set in enumerate(books, 1):
-        book_set = list(chunked(book_set, 2))
+        columns_num = 2
+        book_set = list(chunked(book_set, columns_num))
         rendered_page = template.render(
             book_set=book_set,
             page_number=num,
@@ -76,8 +76,8 @@ def main():
     dest_folder = args.dest_folder
     json_path = Path(args.json_path, 'book_list.json')
     try:
-        check_path(Path(dest_folder) / 'books' / '')
-        check_path(Path(dest_folder) / 'images' / '')
+        check_path(Path(dest_folder) / 'media' / 'books' / '')
+        check_path(Path(dest_folder) / 'media' / 'images' / '')
         check_path(json_path)
     except FileNotFoundError as err:
         path = err.args[0]

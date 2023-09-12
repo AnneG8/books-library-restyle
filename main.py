@@ -168,8 +168,8 @@ def main():
     args = parser.parse_args()
 
     try:
-        book_path = Path(args.dest_folder) / 'books' / ''
-        images_path = Path(args.dest_folder) / 'images' / ''
+        book_path = Path(args.dest_folder) / 'media' / 'books' / ''
+        images_path = Path(args.dest_folder) / 'media' / 'images' / ''
         Path(book_path).mkdir(parents=True, exist_ok=True)
         Path(images_path).mkdir(parents=True, exist_ok=True)
     except PermissionError:
