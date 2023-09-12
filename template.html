@@ -45,7 +45,7 @@
                 <div class="row no-gutters">
                   <div class="col-md-4">
                     {% if book.img_scr %}
-                      <img src="../{{ book.img_scr | replace('\\','/') }}" class="card-img" alt="{{book.author}} :: {{book.title}}">
+                      <img src="../{{ book.img_scr | urlencode }}" class="card-img" alt="{{book.author}} :: {{book.title}}">
                     {% else %}
                       <img src="../static/nopic.gif" class="card-img" alt="{{book.author}} :: {{book.title}}">
                     {% endif %}
@@ -59,7 +59,7 @@
                           <span class="badge badge-light">{{genre}}</span>
                         {% endfor %}
                       </p>
-                      <a href="../{{book.book_path | replace('\\','/') | replace(' ','%20') }}" target="_blank">Читать</a>
+                      <a href="../{{book.book_path | urlencode }}" target="_blank">Читать</a>
                     </div>
                   </div>
                 </div>

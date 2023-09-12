@@ -95,8 +95,6 @@ def main():
     server = Server()
     server.watch('template.html', 
                  add_path(on_reload, json_path, dest_folder))
-    # server.watch('render_website.ry', 
-    #              add_path(on_reload, json_path, dest_folder))
     server.serve(root='.')
 
 
