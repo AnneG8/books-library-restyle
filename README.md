@@ -53,7 +53,7 @@ $ python main.py -s START -e END -f DEST_FOLDER -j JSON_PATH -skt -ske
 $ python render_website.py -f DEST_FOLDER -j JSON_PATH 
 ```
 
-Перейдите по [ссылке](http://127.0.0.1:5500/), для работы с библиотекой. 
+Для работы с библиотекой перейдите по [ссылке](http://127.0.0.1:5500/) или откройте в браузере страницу `index.html`. 
 
 ### Цель проекта
 
